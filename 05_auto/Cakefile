@@ -1,0 +1,41 @@
+{spawn, exec} = require 'child_process'
+# START:livereload      
+task 'livereload', "Start a livereload server", ->
+  livereload = require('livereload')
+  server = livereload.createServer({debug: true,applyJSLive: true})
+  server.watch(__dirname + "/")
+# END:livereload
+
+# START:develop
+task 'develop', 'Continuously compiles files and reloads browser', ->
+  invoke 'livereload'
+  invoke 'watch'
+# END:develop
+
+# START:watch
+task 'watch', 'continually build with --watch', ->
+  src = spawn 'coffee', ['-cw', 'src']
+  src.stdout.on 'data', (data) -> 
+    console.log data.toString().trim()
+    invoke 'test'
+  
+  spec = spawn 'coffee', ['-cw', 'spec']
+  spec.stdout.on 'data', (data) -> 
+    console.log data.toString().trim()
+    invoke 'test'
+# END:watch
+
+task 'build', 'Compile coffeescript files', ->
+  exec "coffee -c src", (err,stdout, stderr) ->
+    console.log stdout
+  
+  exec "coffee -c spec", (err,stdout, stderr) ->
+    console.log stdout
+    
+# START:test
+task 'test', 'Run the tests', ->
+  console.log "running tests"
+  file = "#{__dirname}/SpecRunner.html"
+  exec "phantomjs lib/phantom-jasmine/lib/run_jasmine_test.coffee #{file}", (err,stdout, stderr) ->
+      console.log  stdout  
+# END:test 

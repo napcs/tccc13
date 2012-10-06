@@ -1,0 +1,9 @@
+{spawn, exec} = require 'child_process'
+
+task 'watch', 'continually build with --watch', ->
+  
+  src = spawn 'coffee', ['-cw', 'src']
+  src.stdout.on 'data', (data) -> console.log data.toString().trim()
+  
+  spec = spawn 'coffee', ['-cw', 'spec']
+  spec.stdout.on 'data', (data) -> console.log data.toString().trim()
